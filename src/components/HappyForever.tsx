@@ -23,12 +23,31 @@ export const HappyForever = () => {
   }, []);
 
   useEffect(() => {
-    // Calculate days since a special date (you can customize this)
-    const startDate = new Date('2024-01-01'); // Change this to your special date
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - startDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    setDaysSince(diffDays);
+    const calculateDays = () => {
+      const meetDate = new Date(2025, 10, 15); // November 15, 2025
+      const today = new Date();
+      const diffTime = today.getTime() - meetDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      setDaysSince(Math.max(0, diffDays)); // Ensure non-negative
+    };
+
+    // Calculate immediately
+    calculateDays();
+
+    // Calculate time until next midnight
+    const now = new Date();
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const msUntilMidnight = tomorrow.getTime() - now.getTime();
+
+    // Set timeout for midnight, then interval for daily updates
+    const midnightTimeout = setTimeout(() => {
+      calculateDays();
+      // After first midnight, update every 24 hours
+      const dailyInterval = setInterval(calculateDays, 24 * 60 * 60 * 1000);
+      return () => clearInterval(dailyInterval);
+    }, msUntilMidnight);
+
+    return () => clearTimeout(midnightTimeout);
   }, []);
 
   return (
